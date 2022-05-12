@@ -1,0 +1,67 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2012                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _269d0ffd5c-20210619 OPENFOAM=2012 patch=210618
+Arch   : "LSB;label=32;scalar=64"
+Exec   : mhdPimpleFoam
+Date   : May 06 2022
+Time   : 12:06:18
+Host   : gabrielmarconcini-Lenovo-G50-80
+PID    : 46771
+I/O    : uncollated
+Case   : /home/gabrielmarconcini/Documentos/TCC/PTCC/ShockTube/sim/NewSolver/mhd/sim1
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Create mesh for time = 0
+
+
+PIMPLE: Operating solver in PISO mode
+
+
+BPISO: Operating solver in PISO mode
+
+Reading thermophysical properties
+
+Using #calc at line 20 in file "/home/gabrielmarconcini/Documentos/TCC/PTCC/ShockTube/sim/NewSolver/mhd/sim1/constant/thermophysicalProperties"
+Using #codeStream with "/home/gabrielmarconcini/Documentos/TCC/PTCC/ShockTube/sim/NewSolver/mhd/sim1/dynamicCode/platforms/linux64GccDPInt32Opt/lib/libcodeStream_fa95847276854ecc72ed1e8dc203a09331508353.so"
+Could not load "/home/gabrielmarconcini/Documentos/TCC/PTCC/ShockTube/sim/NewSolver/mhd/sim1/dynamicCode/platforms/linux64GccDPInt32Opt/lib/libcodeStream_fa95847276854ecc72ed1e8dc203a09331508353.so"
+/home/gabrielmarconcini/Documentos/TCC/PTCC/ShockTube/sim/NewSolver/mhd/sim1/dynamicCode/platforms/linux64GccDPInt32Opt/lib/libcodeStream_fa95847276854ecc72ed1e8dc203a09331508353.so: cannot open shared object file: No such file or directory
+Creating new library in "dynamicCode/_fa95847276854ecc72ed1e8dc203a09331508353/platforms/linux64GccDPInt32Opt/lib/libcodeStream_fa95847276854ecc72ed1e8dc203a09331508353.so"
+Invoking wmake libso /home/gabrielmarconcini/Documentos/TCC/PTCC/ShockTube/sim/NewSolver/mhd/sim1/dynamicCode/_fa95847276854ecc72ed1e8dc203a09331508353
+wmake libso /home/gabrielmarconcini/Documentos/TCC/PTCC/ShockTube/sim/NewSolver/mhd/sim1/dynamicCode/_fa95847276854ecc72ed1e8dc203a09331508353
+    ln: ./lnInclude
+    dep: codeStreamTemplate.C
+    Ctoo: codeStreamTemplate.C
+    ld: /home/gabrielmarconcini/Documentos/TCC/PTCC/ShockTube/sim/NewSolver/mhd/sim1/dynamicCode/_fa95847276854ecc72ed1e8dc203a09331508353/../platforms/linux64GccDPInt32Opt/lib/libcodeStream_fa95847276854ecc72ed1e8dc203a09331508353.so
+Selecting thermodynamics package 
+{
+    type            hePsiThermo;
+    mixture         pureMixture;
+    transport       const;
+    thermo          eConst;
+    equationOfState perfectGas;
+    specie          specie;
+    energy          sensibleInternalEnergy;
+}
+
+Using #calc at line 20 in file "/home/gabrielmarconcini/Documentos/TCC/PTCC/ShockTube/sim/NewSolver/mhd/sim1/constant/thermophysicalProperties"
+#0  Foam::error::printStack(Foam::Ostream&) at ??:?
+#1  Foam::sigFpe::sigHandler(int) at ??:?
+#2  ? in /lib/x86_64-linux-gnu/libpthread.so.0
+#3  Foam::hePsiThermo<Foam::psiThermo, Foam::pureMixture<Foam::constTransport<Foam::species::thermo<Foam::eConstThermo<Foam::perfectGas<Foam::specie> >, Foam::sensibleInternalEnergy> > > >::calculate(Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh> const&, Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh>&, Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh>&, Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh>&, Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh>&, Foam::GeometricField<double, Foam::fvPatchField, Foam::volMesh>&, bool) at ??:?
+#4  Foam::fluidThermo::addfvMeshConstructorToTable<Foam::hePsiThermo<Foam::psiThermo, Foam::pureMixture<Foam::constTransport<Foam::species::thermo<Foam::eConstThermo<Foam::perfectGas<Foam::specie> >, Foam::sensibleInternalEnergy> > > > >::New(Foam::fvMesh const&, Foam::word const&) at ??:?
+#5  Foam::autoPtr<Foam::fluidThermo> Foam::basicThermo::New<Foam::fluidThermo>(Foam::fvMesh const&, Foam::word const&) at ??:?
+#6  Foam::fluidThermo::New(Foam::fvMesh const&, Foam::word const&) at ??:?
+#7  ? in ~/OpenFOAM/gabrielmarconcini-v2012/platforms/linux64GccDPInt32Opt/bin/mhdPimpleFoam
+#8  __libc_start_main in /lib/x86_64-linux-gnu/libc.so.6
+#9  ? in ~/OpenFOAM/gabrielmarconcini-v2012/platforms/linux64GccDPInt32Opt/bin/mhdPimpleFoam
