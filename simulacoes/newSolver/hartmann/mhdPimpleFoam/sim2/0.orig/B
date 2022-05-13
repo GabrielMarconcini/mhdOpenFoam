@@ -16,7 +16,7 @@ FoamFile
 
 dimensions      [1 0 -2 0 0 -1 0];
 
-internalField   uniform (0 20 0);
+internalField   uniform (0 1 0);
 
 boundaryField
 {
@@ -33,13 +33,13 @@ boundaryField
     lowerWall
     {
         type            fixedValue;
-        value           uniform (0 20 0);
+        value           uniform (0 1 0);
     }
 
     upperWall
     {
         type            fixedValue;
-        value           uniform (0 20 0);
+        value           uniform (0 1 0);
     }
 
     frontAndBack
