@@ -1,4 +1,4 @@
-Simulação 3 do solver mhdPimpleFoam para o escoamento de Hartmann:
+Simulação 3 utilizando o solver mhdPimpleFoam para o escoamento de Hartmann:
 
 B=(0,50,0) [T]
 
