@@ -1,0 +1,6 @@
+Ux              1.0;
+T               #calc "sqr($Ux/$M)/($gamma*$R)";
+p               #calc "$rho*$R*$T";
+T0              #calc "$T*(1+($gamma-1.0)/2.0*sqr($M))";
+p0              #calc "$p*pow((1+($gamma-1.0)/2.0*sqr($M)),$gamma/($gamma-1.0))";
+dpdx            #calc "-$Ux*12.0*$mu/sqr($h)";
