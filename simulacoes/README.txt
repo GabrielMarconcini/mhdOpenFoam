@@ -1,6 +1,5 @@
-As simulações estão divididas em casos:
+As simulações estão divididas nos três problemas analisados:
 
-bump = caso do escoamento em um canal com um bump.
-hartmann = caso do escoamento de Hartmann.
-poiseuille = caso do escoamento de Poiseuille.
-shockTube = caso do tubo de choque de Sod.
+lombada = caso do escoamento em um canal com uma lombada no meio.
+hartmann = caso do escoamento de Hartmann (MHD) e Poiseuille (Hidrodinâmico).
+shockTube = casos do tubo de choque hidrodinâmicao (Sod) e MHD (Brio e Wu).
