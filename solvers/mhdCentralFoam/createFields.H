@@ -37,6 +37,8 @@ volScalarField rho
     thermo.rho()
 );
 
+#include "createIncompressiblePhi.H"
+
 //==========================================================================================================================================
 //--- Variáveis magnéticas (adicionado):
 
