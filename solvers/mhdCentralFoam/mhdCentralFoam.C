@@ -27,7 +27,7 @@ Application
     mhdCentralFoam
 
 Group
-    mhdCompressibleSolvers
+    magnetohydrodynamics
 
 Description
     Density-based compressible flow solver based on central-upwind
@@ -88,104 +88,120 @@ int main(int argc, char *argv[])
     while (runTime.run())
     {
         // --- Directed interpolation of primitive fields onto faces
+        // magnetic field
+        surfaceVectorField B_pos(interpolate(B, pos));
+        surfaceVectorField B_neg(interpolate(B, neg));
 
+        // magnetic field potential variable
+        surfaceScalarField pB_pos(interpolate(pB, pos));
+        surfaceScalarField pB_neg(interpolate(pB, neg));
+
+        // density
         surfaceScalarField rho_pos(interpolate(rho, pos));
         surfaceScalarField rho_neg(interpolate(rho, neg));
 
-        surfaceVectorField B_pos(interpolate(B, pos));                    //adicionado: B+
-        surfaceVectorField B_neg(interpolate(B, neg));                    //adicionado: B-
-        
-        surfaceScalarField Bf_pos("Bf_pos", B_pos & mesh.Sf());           //adicionado: Bf+
-        surfaceScalarField Bf_neg("Bf_neg", B_neg & mesh.Sf());           //adicionado: Bf-
-        
-
-        surfaceScalarField Bn_pos("Bn_pos", Bf_pos/mesh.magSf());         //adicioando: magnetic field component normal to cell face +
-        surfaceScalarField Bn_neg("Bn_neg", Bf_neg/mesh.magSf());         //adicionado: magnetic field component normal to cell face -
-
+        // momentum
         surfaceVectorField rhoU_pos(interpolate(rhoU, pos, U.name()));
         surfaceVectorField rhoU_neg(interpolate(rhoU, neg, U.name()));
 
+        // compressiblilty inverse
         volScalarField rPsi("rPsi", 1.0/psi);
         surfaceScalarField rPsi_pos(interpolate(rPsi, pos, T.name()));
         surfaceScalarField rPsi_neg(interpolate(rPsi, neg, T.name()));
 
+        // internal energy
         surfaceScalarField e_pos(interpolate(e, pos, T.name()));
         surfaceScalarField e_neg(interpolate(e, neg, T.name()));
 
+        // velocity
         surfaceVectorField U_pos("U_pos", rhoU_pos/rho_pos);
         surfaceVectorField U_neg("U_neg", rhoU_neg/rho_neg);
         
+        // hydrodynamic pressure
         surfaceScalarField p_pos("p_pos", rho_pos*rPsi_pos);
         surfaceScalarField p_neg("p_neg", rho_neg*rPsi_neg);
         
-        surfaceScalarField pM_pos("pM_pos", DBU*magSqr(B_pos));           //adicionado: pressão magnética +
-        surfaceScalarField pM_neg("pM_neg", DBU*magSqr(B_neg));           //adicionado: pressão magnética -
+        // magnetic pressure
+        surfaceScalarField pM_pos("pM_pos", DBU*magSqr(B_pos));
+        surfaceScalarField pM_neg("pM_neg", DBU*magSqr(B_neg));
         
-        surfaceScalarField pG_pos("pG_pos", p_pos + pM_pos);              //adicionado: pressão total +
-        surfaceScalarField pG_neg("pG_neg", p_neg + pM_neg);              //adicionado: pressão total -
+        // overall pressure
+        surfaceScalarField pG_pos("pG_pos", p_pos + pM_pos);
+        surfaceScalarField pG_neg("pG_neg", p_neg + pM_neg);
         
-        surfaceScalarField pB_pos(interpolate(pB, pos));                  //adicionado: variável potêncial +
-        surfaceScalarField pB_neg(interpolate(pB, neg));                  //adicionado: variável potêncial -
-
+        // velocity field flux
         surfaceScalarField phiv_pos("phiv_pos", U_pos & mesh.Sf());
+        surfaceScalarField phiv_neg("phiv_neg", U_neg & mesh.Sf());
         // Note: extracted out the orientation so becomes unoriented
         phiv_pos.setOriented(false);
-        surfaceScalarField phiv_neg("phiv_neg", U_neg & mesh.Sf());
         phiv_neg.setOriented(false);
 
-        surfaceScalarField bf("bf", 0.5*(Bf_neg + Bf_pos));                   //adicionado: coeficiente bf
+        // magnetic field flux
+        surfaceScalarField phib_pos("phib_pos", B_pos & mesh.Sf());
+        surfaceScalarField phib_neg("phib_neg", B_neg & mesh.Sf());
+
+        // coeficiente bf
+        surfaceScalarField bf("bf", 0.5*(phib_neg + phib_pos));
+
+        // magnetic field normal component
+        surfaceScalarField Bn_pos("Bn_pos", phib_pos/mesh.magSf());
+        surfaceScalarField Bn_neg("Bn_neg", phib_neg/mesh.magSf());
  
-        volScalarField vS("vS", sqrt(thermo.Cp()/thermo.Cv()*rPsi));          //adicionado: velocidade do som
-        surfaceScalarField vS_pos("vS_pos", interpolate(vS, pos, T.name()));  //adicionado: velocidade do som +
-        surfaceScalarField vS_neg("vS_neg", interpolate(vS, neg, T.name()));  //adicionado: velocidade do som -
+        // sound speed
+        volScalarField vS("vS", sqrt(thermo.Cp()/thermo.Cv()*rPsi));
+        surfaceScalarField vS_pos("vS_pos", interpolate(vS, pos, T.name()));
+        surfaceScalarField vS_neg("vS_neg", interpolate(vS, neg, T.name()));
         
-        surfaceScalarField vA_pos("vA_pos", mag(B_pos)/(sqrt(mu0*rho_pos)));  //adicionado: velocidade de Alfvén +
-        surfaceScalarField vA_neg("vA_neg", mag(B_neg)/(sqrt(mu0*rho_neg)));  //adicionado: velocidade de Alfvén -
+        // Alfvén speed
+        surfaceScalarField vA_pos("vA_pos", mag(B_pos)/(sqrt(mu0*rho_pos)));
+        surfaceScalarField vA_neg("vA_neg", mag(B_neg)/(sqrt(mu0*rho_neg)));
         
+        // magnetosonic speed
         surfaceScalarField c_pos
         (
             "c_pos",
             sqrt(0.5*(sqr(vS_pos) + sqr(vA_pos) + sqrt(sqr(sqr(vS_pos) + sqr(vA_pos)) - 4*sqr(vS_pos)*(magSqr(Bn_pos)/(mu0*rho_pos)))))
-        );//adicionado: c+ (Equação 24)
+        );
         
         surfaceScalarField c_neg
         (
             "c_neg",
             sqrt(0.5*(sqr(vS_neg) + sqr(vA_neg) + sqrt(sqr(sqr(vS_neg) + sqr(vA_neg)) - 4*sqr(vS_neg)*(magSqr(Bn_neg)/(mu0*rho_neg)))))
-        );//adicionado: c- (Equação 24)
+        );
         
-        surfaceScalarField cf("cf", min(c_pos,c_neg));                         //adicionado: cf (Equação 23)
-
-        surfaceScalarField cSf("cSf", cf*mesh.magSf());                        //adicioando: cf*|Sf| (Equação 21 e 22)
-        
-        
-        //volScalarField c("c", sqrt(thermo.Cp()/thermo.Cv()*rPsi));
-        //surfaceScalarField cSf_pos
-        //(
-        //    "cSf_pos",
-        //    interpolate(c, pos, T.name())*mesh.magSf()
-        //);
-
-        //surfaceScalarField cSf_neg
-        //(
-        //    "cSf_neg",
-        //    interpolate(c, neg, T.name())*mesh.magSf()
-        //);
+        surfaceScalarField cf("cf", min(c_pos,c_neg));
+        surfaceScalarField cSf("cSf", cf*mesh.magSf());
 
         surfaceScalarField ap
         (
             "ap",
             max(max(phiv_pos + cSf, phiv_neg + cSf), v_zero)
-            //max(max(phiv_pos + cSf_pos, phiv_neg + cSf_neg), v_zero)
-        ); //modificado: Equação 21
+        );
 
         surfaceScalarField am
         (
             "am",
             min(min(phiv_pos - cSf, phiv_neg - cSf), v_zero)
-            //min(min(phiv_pos - cSf_pos, phiv_neg - cSf_neg), v_zero)
-        ); //modificado: Equação 22
+        );
 
+        /*----- ALTERNATIVELY
+        surfaceScalarField cSf_pos("cSf_pos", c_pos*mesh.magSf());
+        surfaceScalarField cSf_neg("cSf_neg", c_neg*mesh.magSf());
+
+        surfaceScalarField ap
+        (
+            "ap",
+            max(max(phiv_pos + cSf_pos, phiv_neg + cSf_neg), v_zero)
+        );
+
+        surfaceScalarField am
+        (
+            "am",
+            min(min(phiv_pos - cSf_pos, phiv_neg - cSf_neg), v_zero)
+        );
+        */
+
+        // Kurganov's and Tadmor's rescustruction schemes coeficients
         surfaceScalarField a_pos("a_pos", ap/(ap - am));
 
         surfaceScalarField amaxSf("amaxSf", max(mag(am), mag(ap)));
@@ -237,21 +253,25 @@ int main(int argc, char *argv[])
         Info<< "chGlobal = " << chGlobal << nl 
             << "cdGlobal = " << cdGlobal << endl;
 
+
+        //--- Assembling conservation fluxes
         phi = aphiv_pos*rho_pos + aphiv_neg*rho_neg;
         
-        surfaceVectorField phiB(aphiv_pos*B_pos + aphiv_neg*B_neg);                //adicionado: (a*phif+*B+) + ((1-a)*phif-*B-) + wf*(B- + B+)
-        phiB.setOriented(true);
-
+        surfaceVectorField phiB(aphiv_pos*B_pos + aphiv_neg*B_neg);
         surfaceVectorField phiU(aphiv_pos*rhoU_pos + aphiv_neg*rhoU_neg);
         // Note: reassembled orientation from the pos and neg parts so becomes
         // oriented
+        phiB.setOriented(true);
         phiU.setOriented(true);
 
-        surfaceVectorField phiUp(phiU + (a_pos*pG_pos + a_neg*pG_neg)*mesh.Sf() - DBU*((B_neg*bf) + (B_pos*bf))); //modificado
+        surfaceVectorField phiUp(phiU + (a_pos*pG_pos + a_neg*pG_neg)*mesh.Sf() - DBU*((B_neg*bf) + (B_pos*bf)));
+        /*--- ALTERNATIVELY
+        // Tadmors's method
+        surfaceVectorField phiUp(phiU + (a_pos*pG_pos + a_neg*pG_neg)*mesh.Sf() - DBU*(B_pos*phib_pos - B_neg*phib_neg));
+        */
 
         surfaceScalarField UB_pos("UB_pos", U_pos & B_pos);
         surfaceScalarField UB_neg("UB_neg", U_neg & B_neg);
-
         UB_pos.setOriented(false);
         UB_neg.setOriented(false);
 
@@ -263,7 +283,7 @@ int main(int argc, char *argv[])
         BdotGradB_pos.setOriented(false);
         BdotGradB_neg.setOriented(false);
 
-        bf.setOriented(false);        
+        bf.setOriented(false);
 
         surfaceScalarField phiEp
         (
@@ -273,9 +293,10 @@ int main(int argc, char *argv[])
           + aSf*pG_pos - aSf*pG_neg
         );
 
+        // Adding dissipative terms for non-ideal MHD
         if (!idealMHD)
         {
-           phiEp -= EDBU*gradMagSqrB * mesh.magSf() - EDB*a_pos*BdotGradB_pos * mesh.magSf() - EDB*a_neg*BdotGradB_neg * mesh.magSf();// resistive MHD
+           phiEp -= EDBU*gradMagSqrB * mesh.magSf() - EDB*a_pos*BdotGradB_pos * mesh.magSf() - EDB*a_neg*BdotGradB_neg * mesh.magSf();
         }
        
         bf.setOriented(true);        
@@ -292,22 +313,7 @@ int main(int argc, char *argv[])
         // --- Solve density
         solve(fvm::ddt(rho) + fvc::div(phi));
 
-/*        
-        // --- Solve induction
-        if (idealMHD)
-        {
-           solve(fvm::ddt(B) + fvc::div(phiBU));                          // ideal MHD
-        }
-        else
-        {
-           solve(fvm::ddt(B) + fvc::div(phiBU) - fvm::laplacian(DB, B)); // resistive MHD
-        }
-
-        //B.correctBoundaryConditions();
-*/
         // --- Solve momentum
-        //solve(fvm::ddt(rhoU) + fvc::div(phiUp));
-
         fvVectorMatrix rhoUEqn
         (
             fvm::ddt(rhoU) 
@@ -325,6 +331,7 @@ int main(int argc, char *argv[])
         U.correctBoundaryConditions();
         rhoU.boundaryFieldRef() == rho.boundaryField()*U.boundaryField();
 
+        // Corrector step for viscous flows
         if (!inviscid)
         {
             solve
@@ -359,22 +366,17 @@ int main(int argc, char *argv[])
         fvOptions.constrain(EEqnRCF);
         EEqnRCF.solve();
 
-//        solve
-//        (
-//            fvm::ddt(rhoE) + fvc::div(phiEp)
-//          - fvc::div(sigmaDotU)
-//        );
-
-        e = rhoE/rho - 0.5*magSqr(U) - (DBU/rho)*magSqr(B);            //modificado
-        fvOptions.correct(e);         //Added
+        e = rhoE/rho - 0.5*magSqr(U) - (DBU/rho)*magSqr(B);
+        fvOptions.correct(e); //Added
         e.correctBoundaryConditions();
         thermo.correct();
         rhoE.boundaryFieldRef() ==
             rho.boundaryField()*
             (
                 e.boundaryField() + 0.5*magSqr(U.boundaryField())
-            ) + (DBU.value()*magSqr(B.boundaryField()));               //modificado
+            ) + (DBU.value()*magSqr(B.boundaryField()));
 
+        // Correcting for dissipative terms
         if (!inviscid)
         {
             solve
@@ -383,7 +385,7 @@ int main(int argc, char *argv[])
               - fvm::laplacian(turbulence->alphaEff(), e)
             );
             thermo.correct();
-            rhoE = rho*(e + 0.5*magSqr(U)) + DBU*magSqr(B);            //modificado
+            rhoE = rho*(e + 0.5*magSqr(U)) + DBU*magSqr(B);
         }
 
         p.ref() =
@@ -397,11 +399,13 @@ int main(int argc, char *argv[])
         // --- Solve induction
         if (idealMHD)
         {
-           solve(fvm::ddt(B) + fvc::div(phiBU));                          // ideal MHD
+            // ideal MHD
+            solve(fvm::ddt(B) + fvc::div(phiBU));
         }
         else
         {
-           solve(fvm::ddt(B) + fvc::div(phiBU) - fvm::laplacian(DB, B)); // resistive MHD
+            // resistive MHD
+            solve(fvm::ddt(B) + fvc::div(phiBU) - fvm::laplacian(DB, B));
         }
 
         phiInc = fvc::flux(U);          
