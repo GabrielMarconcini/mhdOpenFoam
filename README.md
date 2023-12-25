@@ -1,7 +1,9 @@
 # mhdOpenFoam
 
-Este repositório contém os solvers mhdCentralFoam e mhdPimpleFoam, além das simulações utilizadas para verificação dos mesmos.
+This repository contains a first version of two solvers for MHD compressible flows, named **mhdCentralFoam** and **mhdPimpleFoam**, and some tests used to verify them.
 
-simulacoes = diretório com as simulações realizadas utilizando os novos solvers.
+## mhdCentralFoam
+This is a density-based solver based on **rhoCentralFoam** with modifications for ideal and non-ideal MHD flows.
 
-solver = diretório com os códigos dos solvers desenvolvidos.
+## mhdPimpleFoam
+This is a pressure-based solver based on **rhoPimpleFoam** with modifications for ideal and non-ideal MHD flows.
